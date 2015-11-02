@@ -3,6 +3,7 @@ package hearc.ch.protoaddplan;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -42,6 +43,7 @@ public class DrawView extends View
     private int heightReal;
     private int meterToPixelWidth;
     private int meterToPixelHeight;
+    private MainActivity main;
 
     public DrawView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -128,6 +130,7 @@ public class DrawView extends View
                     locator.setRealPX(meterToPixelWidth * touchX);
                     locator.setRealPY(meterToPixelHeight * touchY);
                     locatorList.add(locator);
+                    locator.setIndex(locatorList.indexOf(locator));
                     canvasPaint.setColor(Color.BLUE);
                     drawCanvas.drawCircle(locator.getX(), locator.getY(), locator.getRadius(), canvasPaint);
                 }
@@ -160,7 +163,7 @@ public class DrawView extends View
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
-                Log.i("Configuration", "Configuration beacon : " + loc);
+                main.callBeaconConfiguration(loc);
             }
         }).setNegativeButton("Supprimer", new DialogInterface.OnClickListener() {
             @Override
@@ -215,5 +218,10 @@ public class DrawView extends View
     public int getHeightReal()
     {
         return heightReal;
+    }
+
+    public void setMainActivity(MainActivity main)
+    {
+        this.main = main;
     }
 }

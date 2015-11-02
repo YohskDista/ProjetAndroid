@@ -38,6 +38,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
 
+    private static final int BEACON_CONFIGURATION = 2;
     private static int RESULT_LOAD_IMAGE = 1;
     private String picturePath = "";
     private DrawView drawView;
@@ -50,15 +51,7 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
 
         drawView = (DrawView) findViewById(R.id.drawMap);
-        drawView.setLongClickable(true);
-
-        drawView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Log.i("Test", "Long click");
-                return true;
-            }
-        });
+        drawView.setMainActivity(this);
 
         btnInsertPlan = (Button) findViewById(R.id.btnPlaceBeacon);
         btnSave = (Button) findViewById(R.id.btnSavePlan);
@@ -121,6 +114,19 @@ public class MainActivity extends AppCompatActivity{
             btnInsertPlan.setVisibility(View.GONE);
             btnSave.setVisibility(View.VISIBLE);
         }
+
+        Log.i("Test", requestCode+"");
+        if(requestCode == BEACON_CONFIGURATION && resultCode == RESULT_OK && data != null)
+        {
+            List<Locator> listLocator = drawView.getListLocator();
+            Locator newLocator = data.getExtras().getParcelable("locator");
+            listLocator.add(newLocator.getIndex(), newLocator);
+
+            Log.i("Test", "Salut");
+            for (Locator l: listLocator) {
+                Log.i("Test", l.getMajorId()+"");
+            }
+        }
     }
 
     public void showDialogDimension()
@@ -151,6 +157,12 @@ public class MainActivity extends AppCompatActivity{
         AlertDialog alertDialog = alertDialogBuilder.create();
 
         alertDialog.show();
+    }
 
+    public void callBeaconConfiguration(Locator locator)
+    {
+        Intent intent = new Intent(this, BeaconConfigurationActivity.class);
+        intent.putExtra("locator", locator);
+        startActivityForResult(intent, BEACON_CONFIGURATION);
     }
 }

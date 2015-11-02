@@ -16,6 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".BeaconConfigurationActivity"
+            android:label="@string/title_activity_beacon_configuration" >
+        </activity>
     </application>
 
 </manifest>
