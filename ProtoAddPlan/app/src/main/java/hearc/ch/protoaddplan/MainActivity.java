@@ -4,37 +4,37 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telecom.Call;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TableRow;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.NameValuePair;
+import cz.msebera.android.httpclient.client.ClientProtocolException;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
+import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+import cz.msebera.android.httpclient.message.BasicNameValuePair;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -90,6 +90,53 @@ public class MainActivity extends AppCompatActivity{
         List<Locator> listLocator = drawView.getListLocator();
         int widthReal = drawView.getWidthReal();
         int heightReal = drawView.getHeightReal();
+
+        Log.i("Test", "salut");
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                String url = "http://157.26.111.160/ProjetAndroid/action.php";
+                Map<String, String> kvPairs = new HashMap<String, String>();
+                kvPairs.put("vehicle", "salut");
+                HttpResponse re = null;
+                try
+                {
+                    re = doPost(url, kvPairs);
+                    String temp = EntityUtils.toString(re.getEntity());
+
+                    if (temp.compareTo("SUCCESS")==0) {
+                        Toast.makeText(getApplicationContext(), "Sending complete!", Toast.LENGTH_LONG).show();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    public static HttpResponse doPost(String url,Map<String, String> kvPairs) throws ClientProtocolException, IOException {
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpPost httppost = new HttpPost(url);
+
+        if (kvPairs != null && kvPairs.isEmpty() == false) {
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(kvPairs.size());
+            String k, v;
+            Iterator<String> itKeys = kvPairs.keySet().iterator();
+
+            while (itKeys.hasNext()) {
+                k = itKeys.next();
+                v = kvPairs.get(k);
+                nameValuePairs.add(new BasicNameValuePair(k, v));
+            }
+
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        }
+
+        HttpResponse response;
+        response = httpclient.execute(httppost);
+        return response;
     }
 
     @Override
