@@ -127,8 +127,8 @@ public class DrawView extends View
                         return true;
                     }
                     Locator locator = new Locator(touchX, touchY);
-                    locator.setRealPX(meterToPixelWidth * touchX);
-                    locator.setRealPY(meterToPixelHeight * touchY);
+                    locator.setRealPX(touchX / meterToPixelWidth);
+                    locator.setRealPY(touchY / meterToPixelHeight);
                     locatorList.add(locator);
                     locator.setIndex(locatorList.indexOf(locator));
                     canvasPaint.setColor(Color.BLUE);
@@ -163,6 +163,7 @@ public class DrawView extends View
             @Override
             public void onClick(DialogInterface dialog, int which)
             {
+                loc.setIndex(locatorList.indexOf(loc));
                 main.callBeaconConfiguration(loc);
             }
         }).setNegativeButton("Supprimer", new DialogInterface.OnClickListener() {

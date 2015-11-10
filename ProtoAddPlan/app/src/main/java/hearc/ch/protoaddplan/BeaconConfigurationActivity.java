@@ -59,10 +59,11 @@ public class BeaconConfigurationActivity extends AppCompatActivity {
 
     public void onClickSaveBeaconConfig(View view)
     {
-        int minorId = Integer.parseInt(etMinorID.getText().toString());
-        int majorId = Integer.parseInt(etMajorID.getText().toString());
 
-        locator.setMacAdresse(etMacAdresse.getText().toString());
+        int minorId = Integer.parseInt(notBeNull(etMinorID.getText().toString(), 0).toString());
+        int majorId = Integer.parseInt(notBeNull(etMajorID.getText().toString(), 0).toString());
+
+        locator.setMacAdresse(notBeNull(etMacAdresse.getText().toString(), "").toString());
         locator.setMinorId(minorId);
         locator.setMajorId(majorId);
 
@@ -72,6 +73,12 @@ public class BeaconConfigurationActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Votre beacon a été configuré", Toast.LENGTH_SHORT).show();
         this.finish();
+    }
+
+    private Object notBeNull(String text, Object value)
+    {
+        if(text == null) return value;
+        return text;
     }
 
     public void onClickCancel(View view)

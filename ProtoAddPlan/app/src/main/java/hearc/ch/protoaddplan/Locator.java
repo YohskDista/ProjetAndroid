@@ -24,6 +24,7 @@ public class Locator implements Parcelable
     {
         this.pX = px;
         this.pY = py;
+        this.macAdresse = "";
     }
 
     public int getX() { return pX; }

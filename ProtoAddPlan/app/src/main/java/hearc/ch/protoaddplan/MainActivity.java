@@ -2,13 +2,18 @@ package hearc.ch.protoaddplan;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +23,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpEntity;
 import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.NameValuePair;
@@ -44,6 +56,7 @@ public class MainActivity extends AppCompatActivity{
     private DrawView drawView;
     private Button btnSave;
     private Button btnInsertPlan;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,58 +98,94 @@ public class MainActivity extends AppCompatActivity{
         startActivityForResult(i, RESULT_LOAD_IMAGE);
     }
 
-    public void savePlan(View v)
+    public void savePlanAndBeacon(View v)
     {
-        List<Locator> listLocator = drawView.getListLocator();
-        int widthReal = drawView.getWidthReal();
-        int heightReal = drawView.getHeightReal();
+        final List<Locator> listLocator = drawView.getListLocator();
+        final int widthReal = drawView.getWidthReal();
+        final int heightReal = drawView.getHeightReal();
 
-        Log.i("Test", "salut");
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Enregistrement du plan");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setProgress(0);
+        progressDialog.show();
+
+        final int objectToSave = listLocator.size() + 1;
+
         new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                String url = "http://157.26.111.160/ProjetAndroid/action.php";
+                //String url = "http://192.168.1.35/ProjetAndroid/action_add_plan.php";
+                String url = "http://157.26.104.58/ProjetAndroid/action_add_plan.php";
                 Map<String, String> kvPairs = new HashMap<String, String>();
-                kvPairs.put("vehicle", "salut");
-                HttpResponse re = null;
+                kvPairs.put("width", drawView.getWidth()+"");
+                kvPairs.put("height", drawView.getHeight()+"");
+                kvPairs.put("longM", widthReal+"");
+                kvPairs.put("largM", heightReal+"");
+
+                int progression = 0;
+
+                final int idPlan;
+
                 try
                 {
-                    re = doPost(url, kvPairs);
-                    String temp = EntityUtils.toString(re.getEntity());
+                    idPlan = CommunicationBDD.doPost(url, kvPairs, new File(picturePath));
 
-                    if (temp.compareTo("SUCCESS")==0) {
-                        Toast.makeText(getApplicationContext(), "Sending complete!", Toast.LENGTH_LONG).show();
+                    progressDialog.setProgress(++progression);
+
+                    for (Locator l : listLocator)
+                    {
+                        kvPairs.clear();
+                        kvPairs.put("x", l.getX()+"");
+                        kvPairs.put("y", l.getY()+"");
+                        kvPairs.put("posMX", l.getRealPX()+"");
+                        kvPairs.put("posMY", l.getRealPY()+"");
+                        kvPairs.put("minorId", l.getMinorId()+"");
+                        kvPairs.put("majorId", l.getMajorId()+"");
+                        kvPairs.put("MAC", l.getMacAdresse());
+                        kvPairs.put("id_plan", idPlan + "");
+
+                        //CommunicationBDD.doPost("http://192.168.1.35/ProjetAndroid/action_add_beacon.php", kvPairs, null);
+                        CommunicationBDD.doPost("http://157.26.104.58/ProjetAndroid/action_add_beacon.php", kvPairs, null);
+                        progressDialog.setProgress(++progression);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                    progressDialog.dismiss();
+
+                    if(idPlan > 0)
+                    {
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Votre plan a été inséré avec succès", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        MainActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "Il y a eu un problème", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+                catch (IOException e)
+                {
+                    progressDialog.dismiss();
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Le serveur n'est pas accessible pour le moment", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             }
         }).start();
-    }
-
-    public static HttpResponse doPost(String url,Map<String, String> kvPairs) throws ClientProtocolException, IOException {
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost(url);
-
-        if (kvPairs != null && kvPairs.isEmpty() == false) {
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(kvPairs.size());
-            String k, v;
-            Iterator<String> itKeys = kvPairs.keySet().iterator();
-
-            while (itKeys.hasNext()) {
-                k = itKeys.next();
-                v = kvPairs.get(k);
-                nameValuePairs.add(new BasicNameValuePair(k, v));
-            }
-
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-        }
-
-        HttpResponse response;
-        response = httpclient.execute(httppost);
-        return response;
     }
 
     @Override
@@ -162,17 +211,18 @@ public class MainActivity extends AppCompatActivity{
             btnSave.setVisibility(View.VISIBLE);
         }
 
-        Log.i("Test", requestCode+"");
+        Log.i("Test", requestCode + "");
         if(requestCode == BEACON_CONFIGURATION && resultCode == RESULT_OK && data != null)
         {
             List<Locator> listLocator = drawView.getListLocator();
             Locator newLocator = data.getExtras().getParcelable("locator");
+            listLocator.remove(newLocator.getIndex());
             listLocator.add(newLocator.getIndex(), newLocator);
 
-            Log.i("Test", "Salut");
             for (Locator l: listLocator) {
-                Log.i("Test", l.getMajorId()+"");
+                Log.i("Beacon", l.getMajorId()+"");
             }
+
         }
     }
 
@@ -191,10 +241,8 @@ public class MainActivity extends AppCompatActivity{
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton("Confirmer",
-                        new DialogInterface.OnClickListener()
-                        {
-                            public void onClick(DialogInterface dialog, int id)
-                            {
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
                                 int width = Integer.parseInt(etWidth.getText().toString());
                                 int height = Integer.parseInt(etHeight.getText().toString());
                                 drawView.setDimension(width, height);
