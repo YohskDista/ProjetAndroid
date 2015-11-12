@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity{
             public void run()
             {
                 //String url = "http://192.168.1.35/ProjetAndroid/action_add_plan.php";
-                String url = "http://157.26.104.58/ProjetAndroid/action_add_plan.php";
+                String url = "http://157.26.107.116/ProjetAndroid/action_add_plan.php";
                 Map<String, String> kvPairs = new HashMap<String, String>();
                 kvPairs.put("width", drawView.getWidth()+"");
                 kvPairs.put("height", drawView.getHeight()+"");
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity{
                         kvPairs.put("id_plan", idPlan + "");
 
                         //CommunicationBDD.doPost("http://192.168.1.35/ProjetAndroid/action_add_beacon.php", kvPairs, null);
-                        CommunicationBDD.doPost("http://157.26.104.58/ProjetAndroid/action_add_beacon.php", kvPairs, null);
+                        CommunicationBDD.doPost("http://157.26.107.116/ProjetAndroid/action_add_beacon.php", kvPairs, null);
                         progressDialog.setProgress(++progression);
                     }
 
