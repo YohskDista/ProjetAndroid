@@ -20,13 +20,16 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import hearc.ch.maraudermapapplication.R;
-import hearc.ch.maraudermapapplication.tools.CommunicationBDD;
-import hearc.ch.maraudermapapplication.tools.Locator;
+import hearc.ch.maraudermapapplication.tools.bdd.ActionBdd;
+import hearc.ch.maraudermapapplication.tools.bdd.ActionEnum;
+import hearc.ch.maraudermapapplication.tools.bdd.CommunicationBDD;
+import hearc.ch.maraudermapapplication.tools.object.Locator;
+import hearc.ch.maraudermapapplication.tools.object.Plan;
+import hearc.ch.maraudermapapplication.tools.Preferences;
 
 public class CreateMapActivity extends AppCompatActivity {
 
@@ -37,12 +40,14 @@ public class CreateMapActivity extends AppCompatActivity {
     private Button btnSave;
     private Button btnInsertPlan;
     private ProgressDialog progressDialog;
+    private Preferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_map);
 
+        preferences = new Preferences(this);
         drawView = (DrawView) findViewById(R.id.drawMap);
         drawView.setMainActivity(this);
 
@@ -72,18 +77,21 @@ public class CreateMapActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Parcourir la galerie photo
     public void browseGalleryClick(View v)
     {
         Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(i, RESULT_LOAD_IMAGE);
     }
 
+    // Sauvegarde du plan et des Beacons dans la BDD
     public void savePlanAndBeacon(View v)
     {
         final List<Locator> listLocator = drawView.getListLocator();
         final int widthReal = drawView.getWidthReal();
         final int heightReal = drawView.getHeightReal();
 
+        // ProgressDialog d'attente
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Enregistrement du plan");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -93,18 +101,19 @@ public class CreateMapActivity extends AppCompatActivity {
 
         final int objectToSave = listLocator.size() + 1;
 
+        final Plan plan = new Plan(0, picturePath, drawView.getWidth(), drawView.getHeight(), widthReal, heightReal);
+
+        // Sauvegarde du Plan
         new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                //String url = "http://192.168.1.35/ProjetAndroid/action_add_plan.php";
-                String url = "http://157.26.107.116/ProjetAndroid/action_add_plan.php";
-                Map<String, String> kvPairs = new HashMap<String, String>();
-                kvPairs.put("width", drawView.getWidth()+"");
-                kvPairs.put("height", drawView.getHeight()+"");
-                kvPairs.put("longM", widthReal+"");
-                kvPairs.put("largM", heightReal+"");
+                // Sauvegarde du plan dans la BDD et récupération IP
+                String url = "http://"+ preferences.getIpServer() +"/ProjetAndroid/actions_function.php";
+                Map<String, String> kvPairs = plan.createMap();
+                ActionBdd action = new ActionBdd();
+                kvPairs.put("function", action.getMapAction().get(ActionEnum.ADD_PLAN));
 
                 int progression = 0;
 
@@ -112,37 +121,34 @@ public class CreateMapActivity extends AppCompatActivity {
 
                 try
                 {
-                    idPlan = CommunicationBDD.insertNewMap(url, kvPairs, new File(picturePath));
+                    idPlan = CommunicationBDD.insert(url, kvPairs, new File(picturePath));
 
                     progressDialog.setProgress(++progression);
 
+                    // Sauvegarde des beacons dans la BDD
                     if(idPlan > 0)
                     {
                         for (Locator l : listLocator) {
                             kvPairs.clear();
-                            kvPairs.put("x", l.getpX() + "");
-                            kvPairs.put("y", l.getpY() + "");
-                            kvPairs.put("posMX", l.getRealPX() + "");
-                            kvPairs.put("posMY", l.getRealPY() + "");
-                            kvPairs.put("minorId", l.getMinorId() + "");
-                            kvPairs.put("majorId", l.getMajorId() + "");
-                            kvPairs.put("MAC", l.getMacAdresse());
-                            kvPairs.put("id_plan", idPlan + "");
+                            l.setId_plan(idPlan);
+                            kvPairs = l.createMap();
+                            kvPairs.put("function", action.getMapAction().get(ActionEnum.ADD_BEACON));
 
-                            //CommunicationBDD.doPost("http://192.168.1.35/ProjetAndroid/action_add_beacon.php", kvPairs, null);
-                            CommunicationBDD.insertNewBeacon("http://157.26.107.116/ProjetAndroid/action_add_beacon.php", kvPairs, null);
+                            CommunicationBDD.insert(url, kvPairs, null);
                             progressDialog.setProgress(++progression);
                         }
                     }
 
                     progressDialog.dismiss();
 
+                    // Si le plan a été enregistré on quitte l'activité
                     if(idPlan > 0)
                     {
                         CreateMapActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(getApplicationContext(), "Votre plan a été inséré avec succès", Toast.LENGTH_SHORT).show();
+                                CreateMapActivity.this.finish();
                             }
                         });
                     }
@@ -174,6 +180,9 @@ public class CreateMapActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        /**
+         * Affichage du plan sélectionné
+         */
         if(requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null)
         {
             Uri selectedImage = data.getData();String[] filePathColumn = { MediaStore.Images.Media.DATA };
@@ -193,7 +202,9 @@ public class CreateMapActivity extends AppCompatActivity {
             btnSave.setVisibility(View.VISIBLE);
         }
 
-        Log.i("Test", requestCode + "");
+        /**
+         * Si c'est le Beacon qu'on vient de configurer
+         */
         if(requestCode == BEACON_CONFIGURATION && resultCode == RESULT_OK && data != null)
         {
             List<Locator> listLocator = drawView.getListLocator();
@@ -201,13 +212,12 @@ public class CreateMapActivity extends AppCompatActivity {
             listLocator.remove(newLocator.getIndex());
             listLocator.add(newLocator.getIndex(), newLocator);
 
-            for (Locator l: listLocator) {
-                Log.i("Beacon", l.getMajorId()+"");
-            }
-
         }
     }
 
+    /**
+     * AlertDialog pour insérer la longueur et largeur du plan
+     */
     public void showDialogDimension()
     {
         LayoutInflater li = LayoutInflater.from(this);
@@ -236,6 +246,10 @@ public class CreateMapActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    /**
+     * Configuration du Beacon
+     * @param locator
+     */
     public void callBeaconConfiguration(Locator locator)
     {
         Intent intent = new Intent(this, BeaconConfigurationActivity.class);

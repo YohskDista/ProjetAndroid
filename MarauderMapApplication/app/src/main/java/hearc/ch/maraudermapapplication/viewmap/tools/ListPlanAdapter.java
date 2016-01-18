@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hearc.ch.maraudermapapplication.R;
-import hearc.ch.maraudermapapplication.tools.Plan;
+import hearc.ch.maraudermapapplication.tools.object.Plan;
 
 /**
+ * Adapter de la liste des Plan
  * Created by leonardo.distasio on 10.11.2015.
  */
 public class ListPlanAdapter extends BaseAdapter

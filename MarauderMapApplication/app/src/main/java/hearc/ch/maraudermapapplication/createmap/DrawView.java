@@ -20,7 +20,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import hearc.ch.maraudermapapplication.tools.Locator;
+import hearc.ch.maraudermapapplication.tools.object.Locator;
 
 /**
  * Created by leonardo.distasio on 30.10.2015.
@@ -47,6 +47,7 @@ public class DrawView extends View
         setupDrawing();
     }
 
+    // Init des outils pour dessiner
     private void setupDrawing(){
         drawPath = new Path();
         drawPaint = new Paint();
@@ -72,6 +73,7 @@ public class DrawView extends View
         height = h;
     }
 
+    // Dessin sur le plan
     @Override
     protected void onDraw(Canvas canvas) {
         if(picturePath != "") canvas.drawBitmap(getResizedBitmap(width, height, picturePath), 0, 0, canvasPaint);
@@ -79,6 +81,7 @@ public class DrawView extends View
         canvas.drawPath(drawPath, drawPaint);
     }
 
+    // Redimensionner l'image du plan
     public Bitmap getResizedBitmap(int targetW, int targetH,  String imagePath)
     {
         int inWidth = 0;
@@ -106,7 +109,7 @@ public class DrawView extends View
         return Bitmap.createScaledBitmap(roughBitmap, (int) (roughBitmap.getWidth() * values[0]), (int) (roughBitmap.getHeight() * values[4]), true);
     }
 
-    //register user touches as drawing action
+    // Dessiner un Beacon ou ouvrir la dialog de configuration
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int touchX = (int) event.getX();
@@ -139,6 +142,7 @@ public class DrawView extends View
 
     }
 
+    // Redessiner tous les Beacons
     private void repaintLocator()
     {
         for (Locator l:locatorList)
@@ -148,6 +152,7 @@ public class DrawView extends View
         invalidate();
     }
 
+    // Configurer le Beacon ou le supprimer
     private void choiceOptionBeacon(final Locator loc)
     {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -176,6 +181,7 @@ public class DrawView extends View
         builder.show();
     }
 
+    // Si on a cliqué sur un Beacon
     public Locator isLocatorHere(int x, int y)
     {
         for (Locator l:locatorList)
@@ -186,12 +192,14 @@ public class DrawView extends View
         return null;
     }
 
+    // Le path du Plan
     public void setPicturePath(String picturePath)
     {
         this.picturePath = picturePath;
         invalidate();
     }
 
+    // Set les dimenssions du Plan
     public void setDimension(int width, int height)
     {
         this.widthReal = width;

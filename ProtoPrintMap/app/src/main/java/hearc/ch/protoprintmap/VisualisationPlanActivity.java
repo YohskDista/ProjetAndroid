@@ -81,8 +81,8 @@ public class VisualisationPlanActivity extends AppCompatActivity {
 
     public void getListBeaconBDD(final int id_plan)
     {
-        final String url = "http://157.26.107.116/ProjetAndroid/action_get_beacons.php";
-        //final String url = "http://192.168.1.35/ProjetAndroid/action_get_beacons.php";
+        //final String url = "http://157.26.107.116/ProjetAndroid/action_get_beacons.php";
+        final String url = "http://192.168.1.35/ProjetAndroid/action_get_beacons.php";
 
         new Thread(new Runnable()
         {
@@ -113,8 +113,8 @@ public class VisualisationPlanActivity extends AppCompatActivity {
 
     private void drawPlanAndBeacons()
     {
-        String url = "http://157.26.107.116/ProjetAndroid/" + planEtage.getImg().replace('\\', '/');
-        //String url = "http://192.168.1.35/ProjetAndroid/" + planEtage.getImg().replace('\\', '/');
+        //String url = "http://157.26.107.116/ProjetAndroid/" + planEtage.getImg().replace('\\', '/');
+        String url = "http://192.168.1.35/ProjetAndroid/" + planEtage.getImg().replace('\\', '/');
         viewVisualisationPlan.setImageUrl(url);
     }
 }

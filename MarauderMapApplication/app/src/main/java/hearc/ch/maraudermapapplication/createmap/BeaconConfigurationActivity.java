@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import hearc.ch.maraudermapapplication.R;
-import hearc.ch.maraudermapapplication.tools.Locator;
+import hearc.ch.maraudermapapplication.tools.object.Locator;
 
 public class BeaconConfigurationActivity extends AppCompatActivity {
 
@@ -19,22 +19,23 @@ public class BeaconConfigurationActivity extends AppCompatActivity {
     private EditText etMacAdresse;
     private EditText etMinorID;
     private EditText etMajorID;
-    private Button btnSaveConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beacon_configuration);
 
+        // Récupération Locator
         locator = getIntent().getExtras().getParcelable("locator");
+
+        // EditText du fichier XML
         etMacAdresse = (EditText) findViewById(R.id.etMacAdresse);
         etMinorID = (EditText) findViewById(R.id.etMinorID);
         etMajorID = (EditText) findViewById(R.id.etMajorID);
-        btnSaveConfig = (Button) findViewById(R.id.btnSaveConfigBeacon);
 
-        etMacAdresse.setText(locator.getMacAdresse());
-        etMinorID.setText(locator.getMinorId() + "");
-        etMajorID.setText(locator.getMajorId() + "");
+        etMacAdresse.setHint(locator.getMacAdresse());
+        etMinorID.setHint(locator.getMinorId() + "");
+        etMajorID.setHint(locator.getMajorId() + "");
     }
 
     @Override
@@ -45,13 +46,10 @@ public class BeaconConfigurationActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -59,6 +57,9 @@ public class BeaconConfigurationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /*
+    *   Sauvegarde de la configuration Beacon
+    * */
     public void onClickSaveBeaconConfig(View view)
     {
 
@@ -77,12 +78,22 @@ public class BeaconConfigurationActivity extends AppCompatActivity {
         this.finish();
     }
 
+    /**
+     * Test si l'objet est null et le remplace si c'est le cas
+     * @param text
+     * @param value
+     * @return
+     */
     private Object notBeNull(String text, Object value)
     {
         if(text == null) return value;
         return text;
     }
 
+    /**
+     * Bouton d'annulation
+     * @param view
+     */
     public void onClickCancel(View view)
     {
         Intent intent = new Intent();

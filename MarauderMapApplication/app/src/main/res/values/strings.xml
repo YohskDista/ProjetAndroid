@@ -1,12 +1,15 @@
 <resources>
-    <string name="app_name">MarauderMapApplication</string>
+    <string name="app_name">Localisation indoor</string>
 
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Paramètres</string>
     <string name="title_activity_visualisation_plan">Visualisation des plans</string>
     <string name="title_activity_show_all_map">Tous les plans</string>
     <string name="title_activity_create_map">Créer carte</string>
     <string name="title_activity_beacon_configuration">Configuration Beacon</string>
     <string name="action_take_map">Ajouter carte</string>
     <string name="save">Sauvegarder</string>
+    <string name="title_activity_settings">Configuration</string>
+    <string name="server_ip">IP serveur</string>
+    <string name="save_settings">Sauvegarder paramètres</string>
 </resources>

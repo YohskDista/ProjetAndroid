@@ -1,5 +1,6 @@
 package hearc.ch.maraudermapapplication.viewmap;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,22 +17,30 @@ import java.util.List;
 import java.util.Map;
 
 import hearc.ch.maraudermapapplication.R;
-import hearc.ch.maraudermapapplication.tools.CommunicationBDD;
-import hearc.ch.maraudermapapplication.tools.Plan;
+import hearc.ch.maraudermapapplication.tools.bdd.ActionBdd;
+import hearc.ch.maraudermapapplication.tools.bdd.ActionEnum;
+import hearc.ch.maraudermapapplication.tools.bdd.CommunicationBDD;
+import hearc.ch.maraudermapapplication.tools.object.Plan;
+import hearc.ch.maraudermapapplication.tools.Preferences;
 import hearc.ch.maraudermapapplication.viewmap.tools.ListPlanAdapter;
 import hearc.ch.maraudermapapplication.viewmap.tools.ListPlanListener;
 
+/**
+ * Visualisation de tous les plans dans une liste
+ */
 public class ShowAllMapActivity extends AppCompatActivity implements ListPlanListener {
 
     private ListView listPlan;
     private List<Plan> listPlanObj;
     private ListPlanAdapter adapter;
+    private Preferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.show_all_map_main);
 
+        preferences = new Preferences(this);
         listPlanObj = new ArrayList<Plan>();
 
         adapter = new ListPlanAdapter(this, listPlanObj);
@@ -64,10 +74,13 @@ public class ShowAllMapActivity extends AppCompatActivity implements ListPlanLis
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Récupération de tous les plans disponible de la BDD
+     */
     public void getListPlanBDD()
     {
-        final String url = "http://157.26.107.116/ProjetAndroid/action_get_plan.php";
-        //final String url = "http://192.168.1.35/ProjetAndroid/action_get_plan.php";
+        final String url = "http://"+ preferences.getIpServer() +"/ProjetAndroid/actions_function.php";
+        final ActionBdd action = new ActionBdd();
 
         new Thread(new Runnable()
         {
@@ -77,6 +90,7 @@ public class ShowAllMapActivity extends AppCompatActivity implements ListPlanLis
                 try
                 {
                     Map<String, String> values = new HashMap<String, String>();
+                    values.put("function", action.getMapAction().get(ActionEnum.GET_PLAN));
                     values.put("plans", "ok");
 
                     listPlanObj = CommunicationBDD.getPlanInformations(url, values, null);
@@ -99,16 +113,38 @@ public class ShowAllMapActivity extends AppCompatActivity implements ListPlanLis
         }).start();
     }
 
+    /**
+     * Bluetooth enable ?
+     *
+     * @return
+     */
+    private boolean isBluetoothEnable()
+    {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return mBluetoothAdapter.isEnabled();
+    }
+
     @Override
     public void OnClickPlan(Plan plan, int position)
     {
         startVisualisationPlanActivity(plan);
     }
 
+    /**
+     * Visualisation du plan si le Bluetooth est activé
+     * @param plan
+     */
     public void startVisualisationPlanActivity(Plan plan)
     {
-        Intent intent = new Intent(this, VisualisationPlanActivity.class);
-        intent.putExtra("Plan", plan);
-        startActivity(intent);
+        if(isBluetoothEnable())
+        {
+            Intent intent = new Intent(this, VisualisationPlanActivity.class);
+            intent.putExtra("Plan", plan);
+            startActivity(intent);
+        }
+        else
+        {
+            Toast.makeText(this, "Veuillez activer votre Bluetooth !", Toast.LENGTH_SHORT).show();
+        }
     }
 }

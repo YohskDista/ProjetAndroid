@@ -1,6 +1,6 @@
 package hearc.ch.maraudermapapplication.viewmap.tools;
 
-import hearc.ch.maraudermapapplication.tools.Plan;
+import hearc.ch.maraudermapapplication.tools.object.Plan;
 
 /**
  * Created by leonardo.distasio on 10.11.2015.

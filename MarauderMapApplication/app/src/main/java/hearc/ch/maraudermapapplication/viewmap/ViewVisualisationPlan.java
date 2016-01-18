@@ -20,7 +20,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import hearc.ch.maraudermapapplication.tools.Locator;
+import hearc.ch.maraudermapapplication.tools.object.Locator;
+import hearc.ch.maraudermapapplication.tools.object.PersonLocator;
+import hearc.ch.maraudermapapplication.tools.object.Plan;
 
 /**
  * Created by leonardo.distasio on 10.11.2015.
@@ -49,6 +51,7 @@ public class ViewVisualisationPlan extends View
         drawPaint.setColor(paintColor);
         drawPaint.setAntiAlias(true);
         drawPaint.setStrokeWidth(15.0f);
+        drawPaint.setTextSize(12.0f);
         drawPaint.setStyle(Paint.Style.STROKE);
         drawPaint.setStrokeJoin(Paint.Join.ROUND);
         drawPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -99,17 +102,29 @@ public class ViewVisualisationPlan extends View
         return Bitmap.createScaledBitmap(bitmapPlan, (int) (bitmapPlan.getWidth() * values[0]), (int) (bitmapPlan.getHeight() * values[4]), true);
     }
 
-    public void setBeaconsToDraw(List<Locator> listLocator)
+    public void setCircleToDraw(PersonLocator personLocator, List<PersonLocator> listPersonsLocators, Plan plan)
     {
-        locatorList = listLocator;
-        drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
-
-        drawPaint.setColor(Color.BLUE);
-        for(Locator l : locatorList)
-        {
-            drawCanvas.drawCircle(l.getpX(), l.getpY(), l.getRadius(), drawPaint);
+        drawPaint.setStrokeWidth(15.0f);
+        if(personLocator.getId_plan() == plan.getId()) {
+            drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            drawPaint.setColor(Color.RED);
+            drawCanvas.drawCircle(personLocator.getpX(), personLocator.getpY(), personLocator.getRadius(), drawPaint);
+            drawPaint.setStrokeWidth(1.0f);
+            drawCanvas.drawText(personLocator.getNom(), personLocator.getpX() - 35, personLocator.getpY() + 45, drawPaint);
         }
-        drawPaint.setColor(paintColor);
+
+        for(PersonLocator pl : listPersonsLocators)
+        {
+            if(pl.getId() != personLocator.getId())
+            {
+                drawPaint.setStrokeWidth(15.0f);
+                drawPaint.setColor(Color.BLUE);
+                drawCanvas.drawCircle(pl.getpX(), pl.getpY(), pl.getRadius(), drawPaint);
+                drawPaint.setStrokeWidth(1.0f);
+                drawCanvas.drawText(pl.getNom(), pl.getpX() - 35, pl.getpY() + 45, drawPaint);
+                drawPaint.setColor(paintColor);
+            }
+        }
         invalidate();
     }
 

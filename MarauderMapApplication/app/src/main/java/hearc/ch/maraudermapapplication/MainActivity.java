@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import hearc.ch.maraudermapapplication.createmap.CreateMapActivity;
+import hearc.ch.maraudermapapplication.settings.SettingsActivity;
 import hearc.ch.maraudermapapplication.viewmap.ShowAllMapActivity;
 import hearc.ch.maraudermapapplication.viewmap.VisualisationPlanActivity;
 
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 

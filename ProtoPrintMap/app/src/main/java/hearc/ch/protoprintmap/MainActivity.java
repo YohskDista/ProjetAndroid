@@ -65,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements ListPlanListener 
 
     public void getListPlanBDD()
     {
-        final String url = "http://157.26.107.116/ProjetAndroid/action_get_plan.php";
-        //final String url = "http://192.168.1.35/ProjetAndroid/action_get_plan.php";
+        //final String url = "http://157.26.107.116/ProjetAndroid/action_get_plan.php";
+        final String url = "http://192.168.1.35/ProjetAndroid/action_get_plan.php";
 
         new Thread(new Runnable()
         {

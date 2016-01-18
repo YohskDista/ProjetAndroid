@@ -11,7 +11,7 @@
     <Button
         android:id="@+id/btnSeeMap"
         android:text="Voir les cartes"
-        android:background="@drawable/back_button"
+        android:background="@drawable/back_button_transpa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -21,7 +21,7 @@
     <Button
         android:id="@+id/btnCreateMap"
         android:text="Créer une carte"
-        android:background="@drawable/back_button"
+        android:background="@drawable/back_button_transpa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"

@@ -6,7 +6,7 @@
     </uses-permission>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" >
     </uses-permission>
-    <uses-permission android:name="android.permission.BLUETOOTH">
+    <uses-permission android:name="android.permission.BLUETOOTH" >
     </uses-permission>
 
     <application
@@ -23,26 +23,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".viewmap.ShowAllMapActivity"
-            android:label="@string/title_activity_show_all_map">
-
+            android:label="@string/title_activity_show_all_map" >
         </activity>
-
         <activity
-            android:name="hearc.ch.maraudermapapplication.viewmap.VisualisationPlanActivity"
+            android:name=".viewmap.VisualisationPlanActivity"
             android:label="@string/title_activity_visualisation_plan" >
         </activity>
-
         <activity
             android:name=".createmap.CreateMapActivity"
-            android:label="@string/title_activity_create_map">
+            android:label="@string/title_activity_create_map" >
         </activity>
-
         <activity
             android:name=".createmap.BeaconConfigurationActivity"
-            android:label="@string/title_activity_beacon_configuration">
+            android:label="@string/title_activity_beacon_configuration" >
+        </activity>
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:label="@string/title_activity_settings" >
         </activity>
     </application>
 
